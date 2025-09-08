@@ -22,4 +22,4 @@ export function createClient() {
   });
 }
 
-export const createServer = createClient; // alias cho import cũ
+export const createServer = createClient;
