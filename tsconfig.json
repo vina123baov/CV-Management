@@ -20,7 +20,13 @@
       {
         "name": "next"
       }
-    ]
+    ],
+
+    // ⭐ Thêm 2 dòng này
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": [
     "next-env.d.ts",
