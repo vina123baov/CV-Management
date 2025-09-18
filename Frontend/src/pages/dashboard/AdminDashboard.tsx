@@ -1,339 +1,284 @@
-import React, { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  Calendar, 
-  Star, 
-  Mail, 
-  Settings,
-  Bell,
-  Search,
-  Plus,
-  MoreHorizontal,
-  TrendingUp,
-  UserCheck,
-  Clock,
-  Target
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+// src/pages/dashboard/AdminDashboard.tsx
+import React, { useEffect, useState } from "react";
+import Grid from "@mui/material/Unstable_Grid2";
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Avatar,
+  CircularProgress,
+  Paper,
+} from "@mui/material";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
+import PersonIcon from "@mui/icons-material/Person";
+import EventIcon from "@mui/icons-material/Event";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+import { supabase } from "../../utils/supabase";
 
-// Types
-interface MenuItem {
-  id: string;
-  label: string;
-  icon: LucideIcon;
-}
-
-interface Stat {
-  label: string;
-  value: string;
-  change: string;
-  color: string;
-}
-
-interface Application {
-  name: string;
-  position: string;
-  time: string;
-  status: 'pending' | 'approved' | 'interview' | 'rejected';
-}
-
-interface Interview {
-  candidate: string;
-  position: string;
-  time: string;
-  interviewer: string;
-}
-
-const AdminDashboard: React.FC = () => {
-  const [activeMenu, setActiveMenu] = useState<string>('dashboard');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
-
-  const menuItems: MenuItem[] = [
-    { id: 'dashboard', label: 'Bảng điều khiển', icon: LayoutDashboard },
-    { id: 'jobs', label: 'Mô tả công việc', icon: FileText },
-    { id: 'candidates', label: 'Ứng viên', icon: Users },
-    { id: 'interviews', label: 'Lịch phỏng vấn', icon: Calendar },
-    { id: 'evaluations', label: 'Đánh giá phỏng vấn', icon: Star },
-    { id: 'email', label: 'Quản lý email', icon: Mail },
-    { id: 'settings', label: 'Cài đặt', icon: Settings },
-  ];
-
-  const stats: Stat[] = [
-    { label: 'Tổng ứng viên', value: '1,247', change: '+12%', color: 'bg-blue-500' },
-    { label: 'Vị trí tuyển dụng', value: '38', change: '+3%', color: 'bg-green-500' },
-    { label: 'Phỏng vấn hôm nay', value: '12', change: '+8%', color: 'bg-purple-500' },
-    { label: 'Tỷ lệ chấp nhận', value: '73%', change: '+5%', color: 'bg-orange-500' },
-  ];
-
-  const recentApplications: Application[] = [
-    { name: 'Nguyễn Văn A', position: 'Frontend Developer', time: '2 giờ trước', status: 'pending' },
-    { name: 'Trần Thị B', position: 'Backend Developer', time: '4 giờ trước', status: 'approved' },
-    { name: 'Lê Văn C', position: 'UI/UX Designer', time: '6 giờ trước', status: 'interview' },
-    { name: 'Phạm Thị D', position: 'Product Manager', time: '8 giờ trước', status: 'rejected' },
-    { name: 'Hoàng Văn E', position: 'DevOps Engineer', time: '1 ngày trước', status: 'pending' },
-  ];
-
-  const upcomingInterviews: Interview[] = [
-    { candidate: 'Nguyễn Minh F', position: 'Senior Developer', time: '10:00 AM', interviewer: 'Mr. Phong' },
-    { candidate: 'Trần Thị G', position: 'Marketing Manager', time: '2:00 PM', interviewer: 'Ms. Lan' },
-    { candidate: 'Lê Văn H', position: 'Data Analyst', time: '4:00 PM', interviewer: 'Mr. Tuan' },
-  ];
-
-  const getStatusColor = (status: Application['status']): string => {
-    switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'interview': return 'bg-blue-100 text-blue-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: Application['status']): string => {
-    switch (status) {
-      case 'approved': return 'Đã duyệt';
-      case 'rejected': return 'Từ chối';
-      case 'interview': return 'Phỏng vấn';
-      case 'pending': return 'Chờ duyệt';
-      default: return 'Không xác định';
-    }
-  };
-
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white shadow-lg transition-all duration-300 flex flex-col`}>
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Target className="w-5 h-5 text-white" />
-            </div>
-            {!sidebarCollapsed && (
-              <div>
-                <h1 className="font-bold text-gray-900">Recruit AI</h1>
-                <p className="text-xs text-gray-500">Hệ thống quản lý tuyển dụng</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Menu Items */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
-            {menuItems.map((item) => (
-              <li key={item.id}>
-                <button
-                  onClick={() => setActiveMenu(item.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                    activeMenu === item.id
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {!sidebarCollapsed && <span className="font-medium">{item.label}</span>}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* User Profile */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">AI</span>
-            </div>
-            {!sidebarCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">admintest</p>
-                <p className="text-xs text-gray-500 truncate">adminhieu@gmail.com</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="p-2 rounded-lg hover:bg-gray-100"
-              >
-                <LayoutDashboard className="w-5 h-5" />
-              </button>
-              <h2 className="text-xl font-semibold text-gray-900">Bảng điều khiển</h2>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2">
-                <Plus className="w-4 h-4" />
-                <span>Thêm mới</span>
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <main className="flex-1 overflow-auto p-6">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-sm text-green-600 flex items-center mt-2">
-                      <TrendingUp className="w-4 h-4 mr-1" />
-                      {stat.change}
-                    </p>
-                  </div>
-                  <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
-                    {index === 0 && <Users className="w-6 h-6 text-white" />}
-                    {index === 1 && <FileText className="w-6 h-6 text-white" />}
-                    {index === 2 && <Calendar className="w-6 h-6 text-white" />}
-                    {index === 3 && <UserCheck className="w-6 h-6 text-white" />}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Recent Applications */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Đơn ứng tuyển gần đây</h3>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    Xem tất cả
-                  </button>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {recentApplications.map((app, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-600">
-                            {app.name.charAt(0)}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{app.name}</p>
-                          <p className="text-sm text-gray-500">{app.position}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(app.status)}`}>
-                          {getStatusText(app.status)}
-                        </span>
-                        <p className="text-xs text-gray-500 mt-1">{app.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Upcoming Interviews */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Lịch phỏng vấn sắp tới</h3>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    Xem lịch
-                  </button>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {upcomingInterviews.map((interview, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Clock className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{interview.candidate}</p>
-                          <p className="text-sm text-gray-500">{interview.position}</p>
-                          <p className="text-xs text-gray-400">Phỏng vấn với {interview.interviewer}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">{interview.time}</p>
-                        <button className="text-blue-600 hover:text-blue-700 text-sm">
-                          Tham gia
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Tạo công việc mới</p>
-                  <p className="text-sm text-gray-500">Đăng tin tuyển dụng</p>
-                </div>
-              </button>
-              
-              <button className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-green-600" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Quản lý ứng viên</p>
-                  <p className="text-sm text-gray-500">Xem và đánh giá CV</p>
-                </div>
-              </button>
-              
-              <button className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-purple-600" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Lên lịch phỏng vấn</p>
-                  <p className="text-sm text-gray-500">Tạo cuộc hẹn mới</p>
-                </div>
-              </button>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+type Counts = {
+  candidates: number;
+  jobs: number;
+  interviews: number;
+  profiles: number;
 };
 
-export default AdminDashboard;
+export default function AdminDashboard(): JSX.Element {
+  const [counts, setCounts] = useState<Counts | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      setLoading(true);
+      try {
+        const [candidatesRes, jobsRes, interviewsRes, profilesRes] =
+          await Promise.all([
+            supabase.from("cv_candidates").select("id", { count: "exact" }),
+            supabase.from("cv_jobs").select("id", { count: "exact" }),
+            supabase.from("cv_interviews").select("id", { count: "exact" }),
+            supabase.from("cv_profiles").select("id", { count: "exact" }),
+          ]);
+
+        const firstError =
+          candidatesRes.error ||
+          jobsRes.error ||
+          interviewsRes.error ||
+          profilesRes.error;
+        if (firstError) {
+          setError(firstError.message);
+          setCounts(null);
+        } else {
+          const candidatesCount =
+            typeof candidatesRes.count === "number"
+              ? candidatesRes.count
+              : (candidatesRes.data || []).length;
+          const jobsCount =
+            typeof jobsRes.count === "number"
+              ? jobsRes.count
+              : (jobsRes.data || []).length;
+          const interviewsCount =
+            typeof interviewsRes.count === "number"
+              ? interviewsRes.count
+              : (interviewsRes.data || []).length;
+          const profilesCount =
+            typeof profilesRes.count === "number"
+              ? profilesRes.count
+              : (profilesRes.data || []).length;
+
+          setCounts({
+            candidates: candidatesCount,
+            jobs: jobsCount,
+            interviews: interviewsCount,
+            profiles: profilesCount,
+          });
+          setError(null);
+        }
+      } catch (err: any) {
+        setError(err?.message ?? String(err));
+        setCounts(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchCounts();
+  }, []);
+
+  const chartData = [
+    { name: "Jan", value: 16 },
+    { name: "Feb", value: 22 },
+    { name: "Mar", value: 19 },
+    { name: "Apr", value: 17 },
+    { name: "May", value: 32 },
+    { name: "Jun", value: 28 },
+    { name: "Jul", value: 10 },
+  ];
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Bảng điều khiển (Admin)
+      </Typography>
+
+      {loading && (
+        <Box display="flex" justifyContent="center" my={6}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {error && (
+        <Paper sx={{ p: 2, mb: 2, backgroundColor: "#ffebee" }}>
+          <Typography color="error">Lỗi khi tải dữ liệu: {error}</Typography>
+        </Paper>
+      )}
+
+      {!loading && counts && (
+        <Grid container spacing={3}>
+          {/* Card 1 */}
+          <Grid xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="subtitle2">Tổng CV</Typography>
+                    <Typography variant="h5">{counts.candidates}</Typography>
+                  </Box>
+                  <Avatar sx={{ bgcolor: "primary.main" }}>
+                    <PersonIcon />
+                  </Avatar>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Card 2 */}
+          <Grid xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="subtitle2">Vị trí đang tuyển</Typography>
+                    <Typography variant="h5">{counts.jobs}</Typography>
+                  </Box>
+                  <Avatar sx={{ bgcolor: "success.main" }}>
+                    <WorkOutlineIcon />
+                  </Avatar>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Card 3 */}
+          <Grid xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="subtitle2">CV phỏng vấn</Typography>
+                    <Typography variant="h5">{counts.interviews}</Typography>
+                  </Box>
+                  <Avatar sx={{ bgcolor: "warning.main" }}>
+                    <EventIcon />
+                  </Avatar>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Card 4 */}
+          <Grid xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="subtitle2">Hồ sơ</Typography>
+                    <Typography variant="h5">{counts.profiles}</Typography>
+                  </Box>
+                  <Avatar sx={{ bgcolor: "secondary.main" }}>
+                    <AccessTimeIcon />
+                  </Avatar>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Chart */}
+          <Grid xs={12} md={8}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Xu hướng CV theo thời gian
+                </Typography>
+                <Box sx={{ height: 300 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#1976d2"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Latest profiles */}
+          <Grid xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Latest profiles</Typography>
+                <Box mt={2}>
+                  <LatestProfiles />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      )}
+    </Container>
+  );
+}
+
+function LatestProfiles(): JSX.Element {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("cv_profiles")
+        .select("id, full_name, email, inserted_at")
+        .order("inserted_at", { ascending: false })
+        .limit(5);
+
+      if (!error) {
+        setItems(data || []);
+      } else {
+        console.error("LatestProfiles error:", error);
+        setItems([]);
+      }
+      setLoading(false);
+    };
+
+    void fetch();
+  }, []);
+
+  if (loading) return <Typography variant="body2">Đang tải...</Typography>;
+  if (items.length === 0) return <Typography variant="body2">Không có hồ sơ nào</Typography>;
+
+  return (
+    <Box>
+      {items.map((p) => (
+        <Box key={p.id} display="flex" alignItems="center" mb={1}>
+          <Avatar sx={{ mr: 2 }}>{(p.full_name || "?")[0]}</Avatar>
+          <Box>
+            <Typography variant="body1">{p.full_name}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {p.email}
+            </Typography>
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
+}
