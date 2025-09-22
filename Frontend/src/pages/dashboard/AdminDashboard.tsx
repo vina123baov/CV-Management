@@ -90,7 +90,7 @@ export default function AdminDashboard(): JSX.Element {
             ? candidatesRes.count
             : (candidatesRes.data || []).length;
         const jobsCount =
-          typeof jobsRes.count === "number" ? jobsRes.count : (jobsRes.data || []).length;
+typeof jobsRes.count === "number" ? jobsRes.count : (jobsRes.data || []).length;
         const interviewsCount =
           typeof interviewsRes.count === "number"
             ? interviewsRes.count
@@ -161,7 +161,7 @@ export default function AdminDashboard(): JSX.Element {
         if (srcError) {
           console.warn("Error fetching candidate sources:", srcError);
         } else {
-          const map = new Map<string, number>();
+const map = new Map<string, number>();
           (srcRows || []).forEach((r: any) => {
             const s = (r.source ?? "Other") as string;
             map.set(s, (map.get(s) || 0) + 1);
@@ -257,7 +257,7 @@ export default function AdminDashboard(): JSX.Element {
                 value={counts.candidates}
                 subtitle="+12% vs tháng trước"
                 icon={<PersonIcon />}
-                bg="primary.main"
+bg="primary.main"
               />
               <StatCard
                 title="Vị trí đang tuyển"
@@ -325,7 +325,7 @@ export default function AdminDashboard(): JSX.Element {
                   <Typography variant="h6" gutterBottom>
                     Nguồn ứng viên
                   </Typography>
-                  <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+<Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
                     {rechartsModule ? (
                       pieData.length > 0 ? (
                         <rechartsModule.ResponsiveContainer width={360} height={260}>
@@ -377,7 +377,7 @@ export default function AdminDashboard(): JSX.Element {
                       { title: "UI/UX Designer", count: 4, tag: "Bình thường" },
                       { title: "DevOps Engineer", count: 3, tag: "Bình thường" },
                     ].map((t, i) => (
-                      <Box key={i} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider", mb: 1.2 }}>
+<Box key={i} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider", mb: 1.2 }}>
                         <Stack direction="row" spacing={2} alignItems="center">
                           <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: "background.default", display: "flex", alignItems: "center", justifyContent: "center", color: "text.secondary", fontWeight: 600 }}>
                             {i + 1}
@@ -435,7 +435,7 @@ export default function AdminDashboard(): JSX.Element {
           <Box>
             <Card sx={{ mb: 3, position: "sticky", top: 96 }}>
               <CardContent>
-                <Typography variant="h6">Latest profiles</Typography>
+<Typography variant="h6">Latest profiles</Typography>
                 <Box mt={2}>
                   <LatestProfiles />
                 </Box>
@@ -494,7 +494,7 @@ function LatestProfiles(): JSX.Element {
       setLoading(true);
       const { data, error } = await supabase
         .from("cv_profiles")
-        .select("id, full_name, email, inserted_at")
+        .select("id, full_name, inserted_at")
         .order("inserted_at", { ascending: false })
         .limit(5);
 
@@ -523,7 +523,6 @@ function LatestProfiles(): JSX.Element {
             <Avatar sx={{ mr: 2 }}>{initial}</Avatar>
             <Box>
               <Typography variant="body1">{p.full_name}</Typography>
-              <Typography variant="caption" color="text.secondary">{p.email}</Typography>
             </Box>
           </Box>
         );
