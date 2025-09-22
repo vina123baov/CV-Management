@@ -494,7 +494,7 @@ function LatestProfiles(): JSX.Element {
       setLoading(true);
       const { data, error } = await supabase
         .from("cv_profiles")
-        .select("id, full_name, email, inserted_at")
+        .select("id, full_name, inserted_at")
         .order("inserted_at", { ascending: false })
         .limit(5);
 
@@ -523,7 +523,6 @@ function LatestProfiles(): JSX.Element {
             <Avatar sx={{ mr: 2 }}>{initial}</Avatar>
             <Box>
               <Typography variant="body1">{p.full_name}</Typography>
-              <Typography variant="caption" color="text.secondary">{p.email}</Typography>
             </Box>
           </Box>
         );
