@@ -16,6 +16,7 @@
     "@mui/material": "^7.3.2",
     "@mui/system": "^7.3.2",
     "@mui/types": "^7.4.6",
+    "@supabase/supabase-js": "^2.57.4",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

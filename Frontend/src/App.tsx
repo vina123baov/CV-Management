@@ -1,8 +1,21 @@
 // src/App.tsx
-import React from "react";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
-import { JSX } from "react/jsx-runtime";
 
-export default function App(): JSX.Element {
-  return <AdminDashboard />;
+console.log("App component loaded");
+
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+  },
+});
+
+export default function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AdminDashboard />
+    </ThemeProvider>
+  );
 }
